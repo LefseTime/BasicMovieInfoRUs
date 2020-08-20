@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Basic Movie Info R Us</string>
+    <string name="enter_a_movie_title_to_search_for">Enter a movie title to search for.</string>
+    <string name="search">Search</string>
+    <string name="image_of_movie_poster">Image of movie poster</string>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="10dp"
+    tools:context=".SearchFrag">
+
+    <AutoCompleteTextView
+        android:id="@+id/etSearch"
+        android:layout_width="328dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:autofillHints=""
+        android:completionThreshold="0"
+        android:ems="10"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center_horizontal|center_vertical"
+        android:hint="@string/enter_a_movie_title_to_search_for"
+        android:inputType="textNoSuggestions" />
+
+    <ImageButton
+        android:id="@+id/btnSearch"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="end"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@color/colorPrimary"
+        android:contentDescription="@string/search"
+        android:fontFamily="sans-serif-light"
+        android:src="@drawable/ic_baseline_search_24"
+        android:text="@string/search"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp" />
+
+<!--    <Button-->
+<!--        android:id="@+id/btnSearch"-->
+<!--        android:layout_width="74dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:layout_gravity="right"-->
+<!--        android:layout_marginLeft="20dp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:layout_marginRight="20dp"-->
+<!--        android:background="@color/colorPrimaryDark"-->
+<!--        android:fontFamily="sans-serif-light"-->
+<!--        android:text="@string/search"-->
+<!--        android:textColor="@color/colorAccent"-->
+<!--        android:textSize="18sp" />-->
+
+</FrameLayout>
