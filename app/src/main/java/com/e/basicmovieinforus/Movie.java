@@ -7,7 +7,7 @@ public class Movie {
     private String overview;
 
     public Movie(String poster, String title, String date, String overview) {
-        this.poster = "https://image.tmdb.org/t/p/w185" + poster;
+        this.poster = poster;
         this.title = title;
         this.date = date;
         this.overview = overview;
@@ -18,7 +18,7 @@ public class Movie {
     }
 
     public void setPoster(String poster) {
-        this.poster = "https://image.tmdb.org/t/p/w185" + poster;
+        this.poster = poster;
     }
 
     public String getTitle() {

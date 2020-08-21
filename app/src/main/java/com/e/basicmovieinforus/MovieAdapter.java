@@ -59,8 +59,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         viewHolder.tvDate.setText(movies.get(i).getDate());
         viewHolder.tvOverview.setText(movies.get(i).getOverview());
 
+        String poster = movies.get(i).getPoster();
         Context context = viewHolder.ivPoster.getContext();
-        Picasso.with(context).load(movies.get(i).getPoster()).into(viewHolder.ivPoster);
+
+        if (!poster.equals("")){
+            Picasso.with(context).load(movies.get(i).getPoster()).placeholder(R.drawable.ic_launcher_foreground).into(viewHolder.ivPoster);
+        } else {
+            Picasso.with(context).load(R.drawable.ic_launcher_foreground).placeholder(R.drawable.ic_launcher_foreground).into(viewHolder.ivPoster);
+        }
+
     }
 
     @Override

@@ -25,6 +25,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+
 public class MainActivity extends AppCompatActivity {
 
     //UI elements
@@ -58,15 +65,8 @@ public class MainActivity extends AppCompatActivity {
         data = searchDB.getData();
         searchDB.close();
 
-
         btnSearch = findViewById(R.id.btnSearch);
         etSearch = findViewById(R.id.etSearch);
-        suggestionAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data);
-        etSearch.setAdapter(suggestionAdapter);
-
-        recyclerView = findViewById(R.id.rvList);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
 
         initAdapter();
 
@@ -77,19 +77,25 @@ public class MainActivity extends AppCompatActivity {
                 etSearch.showDropDown();
             }
         });
-
         btnSearch.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View view) {
-                currentPage = 0;
-                searchResults = "";
-                resultsObj = null;
-                loadedMovies.clear();
-                searchTitle = etSearch.getText().toString().toLowerCase().trim();
-                hideKeyboard(MainActivity.this);
 
-                new SearchForMovie().execute();
+                searchTitle = etSearch.getText().toString().toLowerCase().trim();
+                if (searchTitle.equals("")){
+                    showSearchError("Enter a movie title to search.", "Try Again");
+                } else {
+                    currentPage = 0;
+                    searchResults = "";
+                    resultsObj = null;
+                    loadedMovies.clear();
+                    searchTitle = etSearch.getText().toString().toLowerCase().trim();
+                    recyclerView.getAdapter().notifyDataSetChanged();
+                    hideKeyboard(MainActivity.this);
+
+                    new SearchForMovie().execute();
+                }
             }
         });
 
@@ -108,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Integer... integers) {
-
             try {
                 currentPage++;
                 URL url = new URL("http://api.themoviedb.org/3/search/movie?api_key=2696829a81b1b5827d515ff121700838&query="
@@ -133,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                     } else{
                         Boolean exists = false;
                         for(Integer i = 0; i < data.size(); i++){
-                            if (data.get(i).toString().equals(searchTitle)){
+                            if (data.get(i).equals(searchTitle)){
                                 exists = true;
                                 break;
                             }
@@ -141,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
                         if (!exists){
                             searchDB.open();
                             searchDB.createEntry(searchTitle);
-                            data = searchDB.getData();
                             searchDB.close();
 
+                            data.add(searchTitle);
                         }
                         return result;
                     }
@@ -156,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("ERROR", e.getMessage(), e);
                 return null;
             }
+
         }
 
         @Override
@@ -168,20 +174,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(s);
 
             if (s == null){
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
-                builder1.setMessage("Sorry, your search doesn't make sense.");
-                builder1.setCancelable(true);
-
-                builder1.setPositiveButton(
-                        "Try Again",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface popupDialog, int id) {
-                                popupDialog.cancel();
-                                etSearch.setText("");
-                            }
-                        });
-                AlertDialog alert11 = builder1.create();
-                alert11.show();
+                showSearchError("Sorry, your search doesn't make sense.", "Try Again");
             } else {
                 searchResults = s;
                 populateData();
@@ -202,22 +195,33 @@ public class MainActivity extends AppCompatActivity {
     private void populateData() {
         try {
             resultsObj = new JSONObject(searchResults);
-            String resultsStr = null;
-            resultsStr = resultsObj.getString("results");
 
             Movie currentMovie;
-            JSONArray resultsArr = null;
 
-            resultsArr = new JSONArray(resultsStr);
-//            loadedMovies.clear();
+            for(int i=0; i<resultsObj.getJSONArray("results").length(); i++){
+                JSONObject currentObj = resultsObj.getJSONArray("results").getJSONObject(i);
 
+                String currentPoster = ((currentObj.getString("poster_path").equals("null")) ? "" : "https://image.tmdb.org/t/p/w185" + currentObj.getString("poster_path"));
+                String currentTitle;
+                String currentDate;
+                String currentOverview;
+                try{
+                    currentTitle = currentObj.getString("title").equals("") ? "Title unavailable." : currentObj.getString("title");
+                } catch (JSONException e){
+                    currentTitle = "Title unavailable.";
+                }
+                try{
+                    currentDate = currentObj.getString("release_date").equals("") ? "Release date unavailable." : currentObj.getString("release_date");
+                } catch (JSONException e){
+                    currentDate = "Release date unavailable.";
+                }
+                try{
+                    currentOverview = currentObj.getString("overview").equals("") ? "Plot overview unavailable." : currentObj.getString("overview");
+                } catch (JSONException e){
+                    currentOverview = "Release date unavailable.";
+                }
 
-            for(int i=0; i<resultsArr.length(); i++){
-                JSONObject currentObj = null;
-
-                currentObj = resultsArr.getJSONObject(i);
-
-                currentMovie = new Movie(currentObj.getString("poster_path"),currentObj.getString("title"),currentObj.getString("release_date"),currentObj.getString("overview"));
+                currentMovie = new Movie(currentPoster,currentTitle,currentDate,currentOverview);
                 loadedMovies.add(currentMovie);
 
             }
@@ -225,10 +229,8 @@ public class MainActivity extends AppCompatActivity {
             if (currentPage == 1){
                 recyclerView.getAdapter().notifyDataSetChanged();
             } else {
-                recyclerView.getAdapter().notifyItemInserted(loadedMovies.size());
+                recyclerView.getAdapter().notifyItemInserted(loadedMovies.size() - 1);
             }
-//            recyclerView.getAdapter().notifyItemInserted(loadedMovies.size());
-//            recyclerView.getAdapter().notifyDataSetChanged();
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -236,6 +238,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initAdapter() {
+        recyclerView = findViewById(R.id.rvList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
         resultsAdapter = new MovieAdapter(loadedMovies);
         recyclerView.setAdapter(resultsAdapter);
 
@@ -266,5 +272,22 @@ public class MainActivity extends AppCompatActivity {
             view = new View(activity);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public void showSearchError(String errorText, String buttonText){
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+        builder1.setMessage(errorText);
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+                buttonText,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface popupDialog, int id) {
+                        popupDialog.cancel();
+                        etSearch.setText("");
+                    }
+                });
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 }
