@@ -18,15 +18,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     private ArrayList<Movie> movies;
 
-
     public MovieAdapter(ArrayList<Movie> list){
-
         movies = list;
-
-
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder{
 
         ImageView ivPoster;
         TextView tvTitle;
@@ -42,7 +38,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             tvOverview = itemView.findViewById(R.id.tvOverview);
         }
     }
-
 
     @NonNull
     @Override

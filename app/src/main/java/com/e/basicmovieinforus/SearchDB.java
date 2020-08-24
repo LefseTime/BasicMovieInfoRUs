@@ -48,20 +48,19 @@ public class SearchDB {
         }
     }
 
-    public SearchDB open() throws SQLException {
+    public void open() throws SQLException {
         ourHelper = new DBHelper(ourContext);
         ourDatabase = ourHelper.getWritableDatabase();
-        return this;
     }
 
     public void close(){
         ourHelper.close();
     }
 
-    public static long createEntry(String searchTerm){
+    public static void createEntry(String searchTerm){
         ContentValues cv = new ContentValues();
         cv.put(KEY_SEARCH_TERM, searchTerm);
-        return ourDatabase.insert(DATABASE_TABLE, null, cv);
+        ourDatabase.insert(DATABASE_TABLE, null, cv);
     }
 
     public static ArrayList<String> getData(){

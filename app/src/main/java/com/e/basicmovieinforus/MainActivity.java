@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     Integer currentPage;
 
     RecyclerView recyclerView;
-    RecyclerView.Adapter resultsAdapter;
+    RecyclerView.Adapter<MovieAdapter.ViewHolder> resultsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         searchDB = new SearchDB(this);
         searchDB.open();
-        data = searchDB.getData();
+        data = SearchDB.getData();
         searchDB.close();
 
         btnSearch = findViewById(R.id.btnSearch);
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                     resultsObj = null;
                     loadedMovies.clear();
                     searchTitle = etSearch.getText().toString().toLowerCase().trim();
-                    recyclerView.getAdapter().notifyDataSetChanged();
+                    Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
                     hideKeyboard(MainActivity.this);
 
                     new SearchForMovie().execute();
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class SearchForMovie extends AsyncTask<Integer, Integer, String> {
 
         public SearchForMovie() {
@@ -136,8 +139,8 @@ public class MainActivity extends AppCompatActivity {
                     if(resultsObj.getInt("total_results") == 0 || resultsObj == null){
                         return null;
                     } else {
-                        Boolean exists = false;
-                        for(Integer i = 0; i < data.size(); i++){
+                        boolean exists = false;
+                        for(int i = 0; i < data.size(); i++){
                             if (data.get(i).equals(searchTitle)){
                                 exists = true;
                                 break;
@@ -145,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (!exists){
                             searchDB.open();
-                            searchDB.createEntry(searchTitle);
-                            data = searchDB.getData();
+                            SearchDB.createEntry(searchTitle);
+                            data = SearchDB.getData();
                             searchDB.close();
 
                             suggestionAdapter.clear();
@@ -230,9 +233,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (currentPage == 1){
-                recyclerView.getAdapter().notifyDataSetChanged();
+                Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
             } else {
-                recyclerView.getAdapter().notifyItemInserted(loadedMovies.size() - 1);
+                Objects.requireNonNull(recyclerView.getAdapter()).notifyItemInserted(loadedMovies.size() - 1);
             }
 
         } catch (JSONException e) {
