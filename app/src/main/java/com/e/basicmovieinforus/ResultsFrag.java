@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 
 public class ResultsFrag extends Fragment {
 
+    View resultsView;
+
     public ResultsFrag() {
         // Required empty public constructor
     }
@@ -31,6 +33,8 @@ public class ResultsFrag extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        resultsView = getActivity().findViewById(R.id.rvList);
     }
 
     @Override

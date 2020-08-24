@@ -11,11 +11,14 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,36 +74,6 @@ public class MainActivity extends AppCompatActivity {
         etSearch = findViewById(R.id.etSearch);
 
         initAdapter();
-
-        etSearch.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View view) {
-                etSearch.showDropDown();
-            }
-        });
-        btnSearch.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View view) {
-
-                searchTitle = etSearch.getText().toString().toLowerCase().trim();
-                if (searchTitle.equals("")){
-                    showSearchError("Enter a movie title to search.", "Try Again");
-                } else {
-                    currentPage = 0;
-                    searchResults = "";
-                    resultsObj = null;
-                    loadedMovies.clear();
-                    searchTitle = etSearch.getText().toString().toLowerCase().trim();
-                    Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
-                    hideKeyboard(MainActivity.this);
-
-                    new SearchForMovie().execute();
-                }
-            }
-        });
-
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -108,11 +81,6 @@ public class MainActivity extends AppCompatActivity {
 
         public SearchForMovie() {
             super();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
         }
 
         @Override
@@ -171,11 +139,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
@@ -185,16 +148,6 @@ public class MainActivity extends AppCompatActivity {
                 searchResults = s;
                 populateData();
             }
-        }
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
         }
     }
 
@@ -267,6 +220,47 @@ public class MainActivity extends AppCompatActivity {
         suggestionAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data);
         etSearch.setAdapter(suggestionAdapter);
 
+        etSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                startSearch();
+            }
+        });
+
+        etSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                etSearch.showDropDown();
+            }
+        });
+
+        btnSearch.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                startSearch();
+            }
+        });
+
+
+
+    }
+
+    private void startSearch(){
+        searchTitle = etSearch.getText().toString().toLowerCase().trim();
+        etSearch.setText("");
+        if (searchTitle.equals("")){
+            showSearchError("Enter a movie title to search.", "Try Again");
+        } else {
+            currentPage = 0;
+            searchResults = "";
+            resultsObj = null;
+            loadedMovies.clear();
+            Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
+            hideKeyboard(MainActivity.this);
+
+            new SearchForMovie().execute();
+        }
     }
 
     public static void hideKeyboard(Activity activity) {
