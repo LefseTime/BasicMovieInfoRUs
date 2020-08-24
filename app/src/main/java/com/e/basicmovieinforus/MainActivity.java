@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if(resultsObj.getInt("total_results") == 0 || resultsObj == null){
                         return null;
-                    } else{
+                    } else {
                         Boolean exists = false;
                         for(Integer i = 0; i < data.size(); i++){
                             if (data.get(i).equals(searchTitle)){
@@ -146,9 +146,12 @@ public class MainActivity extends AppCompatActivity {
                         if (!exists){
                             searchDB.open();
                             searchDB.createEntry(searchTitle);
+                            data = searchDB.getData();
                             searchDB.close();
 
-                            data.add(searchTitle);
+                            suggestionAdapter.clear();
+                            suggestionAdapter.addAll(data);
+                            suggestionAdapter.notifyDataSetChanged();
                         }
                         return result;
                     }
